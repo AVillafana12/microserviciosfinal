@@ -16,8 +16,8 @@
 	<description>Demo project for Spring Boot</description>
 
 	<modules>
-		<module>clinic-auth-server</module>
-		<module>clinic-gateway-server</module>
+		<module>gateway</module>
+		<module>eureka_server</module>
 		<module>clinic-patient-service</module>
 		<module>clinic-appointment-service</module>
 	</modules>
