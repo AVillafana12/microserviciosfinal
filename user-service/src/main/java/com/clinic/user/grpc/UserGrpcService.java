@@ -17,24 +17,30 @@ public class UserGrpcService extends UserServiceGrpcGrpc.UserServiceGrpcImplBase
 
     @Override
     public void getUserById(GetUserRequest request, StreamObserver<UserResponse> responseObserver) {
-        User u = userService.obtenerPorId(request.getId());
-        if (u == null) {
+        try {
+            Integer userId = Integer.valueOf(request.getId());
+            User u = userService.obtenerPorId(userId);
+            if (u == null) {
+                responseObserver.onNext(UserResponse.newBuilder().setId("").build());
+                responseObserver.onCompleted();
+                return;
+            }
+
+            UserResponse resp = UserResponse.newBuilder()
+                    .setId(String.valueOf(u.getId()))
+                    .setNombre(u.getNombre())
+                    .setApellido(u.getApellido())
+                    .setCorreo(u.getCorreo())
+                    .setTelefono(u.getTelefono() == null ? "" : u.getTelefono())
+                    .setRole(u.getRole() == null ? "" : u.getRole().name())
+                    .build();
+
+            responseObserver.onNext(resp);
+            responseObserver.onCompleted();
+        } catch (NumberFormatException e) {
             responseObserver.onNext(UserResponse.newBuilder().setId("").build());
             responseObserver.onCompleted();
-            return;
         }
-
-        UserResponse resp = UserResponse.newBuilder()
-                .setId(u.getId())
-                .setNombre(u.getNombre())
-                .setApellido(u.getApellido())
-                .setCorreo(u.getCorreo())
-                .setTelefono(u.getTelefono() == null ? "" : u.getTelefono())
-                .setRole(u.getRole() == null ? "" : u.getRole().name())
-                .build();
-
-        responseObserver.onNext(resp);
-        responseObserver.onCompleted();
     }
 
     @Override
@@ -43,7 +49,7 @@ public class UserGrpcService extends UserServiceGrpcGrpc.UserServiceGrpcImplBase
         UserListResponse.Builder b = UserListResponse.newBuilder();
         for (User u : list) {
             b.addUsers(UserResponse.newBuilder()
-                    .setId(u.getId())
+                    .setId(String.valueOf(u.getId()))
                     .setNombre(u.getNombre())
                     .setApellido(u.getApellido())
                     .setCorreo(u.getCorreo())

@@ -27,7 +27,7 @@ public class SecurityConfig {
                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/**", "/health", "/info").permitAll()
                .requestMatchers("/swagger-ui.html", "/swagger-resources/**").permitAll()
                .requestMatchers("/api/users/public/**").permitAll()
-               .anyRequest().permitAll() // Temporary: allow all for testing
+               .anyRequest().authenticated()
            )
            .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()));
 
@@ -37,10 +37,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080", "http://localhost:8082", "http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

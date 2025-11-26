@@ -9,6 +9,17 @@ Base de datos: clinic
 Puerto: 5432 (si te lo pide)
 Schemas: public (usuarios), images (imágenes de usuarios)
 
+Tabla users (public schema):
+  - id: SERIAL PRIMARY KEY
+  - keycloak_id: VARCHAR(255) UNIQUE (ID de Keycloak)
+  - nombre: VARCHAR(255) NOT NULL
+  - apellido: VARCHAR(255) NOT NULL
+  - correo: VARCHAR(255) NOT NULL UNIQUE
+  - telefono: VARCHAR(20)
+  - role: VARCHAR(50) DEFAULT 'USER'
+  - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
 Para la BD de citas (appointment-service-db)
 Servidor: appointment-service-db
 Usuario: postgres
@@ -22,7 +33,7 @@ Schema: images
 Tabla: user_images
 Columnas:
   - id: SERIAL PRIMARY KEY (autoincremental)
-  - user_id: INTEGER NOT NULL (FK a usuarios)
+  - user_id: INTEGER NOT NULL (FK a usuarios - tabla public.users)
   - image: BYTEA NOT NULL (imagen en bytes)
   - uploaded_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   - filename: VARCHAR(255) (nombre original del archivo)

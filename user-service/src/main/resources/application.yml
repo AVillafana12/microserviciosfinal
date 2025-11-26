@@ -8,16 +8,18 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/clinic
-          jwk-set-uri: http://keycloak:8080/realms/clinic/protocol/openid-connect/certs
+          issuer-uri: http://keycloak:8080/realms/clinic-realm
+          jwk-set-uri: http://keycloak:8080/realms/clinic-realm/protocol/openid-connect/certs
 
 server:
   port: 9090
