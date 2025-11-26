@@ -2,8 +2,8 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:postgresql://user-service-db:5432/postgres
-    username: postgres
+    url: jdbc:postgresql://user-service-db:5432/clinic
+    username: clinic_user
     password: clinic_password
     driver-class-name: org.postgresql.Driver
   jpa:
@@ -29,3 +29,19 @@ eureka:
   instance:
     preferIpAddress: true
     leaseRenewalIntervalInSeconds: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,actuator
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

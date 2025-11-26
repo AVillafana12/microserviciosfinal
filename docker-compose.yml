@@ -52,11 +52,6 @@ services:
       - eureka-server
       - keycloak
     environment:
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTID: "gateway"
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTSECRET: "kn6qXopbH5jqx26zFdyS1odEE6nVSDr4"
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUERURI: "http://keycloak:8080/realms/clinic"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: "http://keycloak:8080/realms/clinic"
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:eureka123@eureka-server:8761/eureka/"
       JAVA_OPTS: "-Xmx512m -Xms256m"
     networks:
       - microservices-net
@@ -79,12 +74,6 @@ services:
       keycloak:
         condition: service_started
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://user-service-db:5432/postgres"
-      SPRING_DATASOURCE_USERNAME: "postgres"
-      SPRING_DATASOURCE_PASSWORD: "clinic_password"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUERURI: "http://keycloak:8080/realms/clinic"
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: "http://eureka:eureka123@eureka-server:8761/eureka/"
       JAVA_OPTS: "-Xmx512m -Xms256m"
     networks:
       - microservices-net
