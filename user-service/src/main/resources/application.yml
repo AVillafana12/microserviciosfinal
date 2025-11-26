@@ -24,6 +24,10 @@ spring:
 server:
   port: 9090
 
+grpc:
+  server:
+    port: 9091
+
 eureka:
   client:
     serviceUrl:

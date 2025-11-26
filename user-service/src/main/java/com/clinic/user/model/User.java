@@ -1,17 +1,10 @@
 package com.clinic.user.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users", schema = "public")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class User {
 
     @Id
@@ -51,5 +44,161 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    // Constructors
+    public User() {
+    }
+
+    public User(Integer id, String keycloakId, String nombre, String apellido, String correo, 
+                String telefono, UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.keycloakId = keycloakId;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.correo = correo;
+        this.telefono = telefono;
+        this.role = role;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Builder pattern
+    public static UserBuilder builder() {
+        return new UserBuilder();
+    }
+
+    public static class UserBuilder {
+        private Integer id;
+        private String keycloakId;
+        private String nombre;
+        private String apellido;
+        private String correo;
+        private String telefono;
+        private UserRole role;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+
+        public UserBuilder id(Integer id) {
+            this.id = id;
+            return this;
+        }
+
+        public UserBuilder keycloakId(String keycloakId) {
+            this.keycloakId = keycloakId;
+            return this;
+        }
+
+        public UserBuilder nombre(String nombre) {
+            this.nombre = nombre;
+            return this;
+        }
+
+        public UserBuilder apellido(String apellido) {
+            this.apellido = apellido;
+            return this;
+        }
+
+        public UserBuilder correo(String correo) {
+            this.correo = correo;
+            return this;
+        }
+
+        public UserBuilder telefono(String telefono) {
+            this.telefono = telefono;
+            return this;
+        }
+
+        public UserBuilder role(UserRole role) {
+            this.role = role;
+            return this;
+        }
+
+        public UserBuilder createdAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public UserBuilder updatedAt(LocalDateTime updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public User build() {
+            return new User(id, keycloakId, nombre, apellido, correo, telefono, role, createdAt, updatedAt);
+        }
+    }
+
+    // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getKeycloakId() {
+        return keycloakId;
+    }
+
+    public void setKeycloakId(String keycloakId) {
+        this.keycloakId = keycloakId;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

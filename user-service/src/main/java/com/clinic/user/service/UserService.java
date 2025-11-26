@@ -3,7 +3,6 @@ package com.clinic.user.service;
 import com.clinic.user.model.User;
 import com.clinic.user.model.UserRole;
 import com.clinic.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -12,10 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository repository;
+
+    public UserService(UserRepository repository) {
+        this.repository = repository;
+    }
 
     public User crearUsuario(User user) {
         if (user.getRole() == null) {

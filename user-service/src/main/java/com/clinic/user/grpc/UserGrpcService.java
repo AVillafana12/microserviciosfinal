@@ -3,17 +3,19 @@ package com.clinic.user.grpc;
 import com.clinic.user.model.User;
 import com.clinic.user.proto.*;
 import com.clinic.user.service.UserService;
-import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 import io.grpc.stub.StreamObserver;
 
 import java.util.List;
 
 @GrpcService
-@RequiredArgsConstructor
 public class UserGrpcService extends UserServiceGrpcGrpc.UserServiceGrpcImplBase {
 
     private final UserService userService;
+
+    public UserGrpcService(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public void getUserById(GetUserRequest request, StreamObserver<UserResponse> responseObserver) {
