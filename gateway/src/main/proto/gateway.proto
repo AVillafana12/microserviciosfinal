@@ -1,0 +1,10 @@
+<plugin>
+    <groupId>org.xolstice.maven.plugins</groupId>
+    <artifactId>protobuf-maven-plugin</artifactId>
+    <version>0.6.1</version>
+    <configuration>
+        <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
+        <outputDirectory>${project.basedir}/target/generated-sources/protobuf</outputDirectory>
+    </configuration>
+</plugin>
+
