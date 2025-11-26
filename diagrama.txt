@@ -1,0 +1,282 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    🏥 CLINIC MICROSERVICES ARCHITECTURE                        ║
+║                              (Noviembre 2025)                                  ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                            🌐 EXTERNAL CLIENTS                                   │
+│                   (Browser, Mobile, Desktop Applications)                        │
+└────────────────────────────┬────────────────────────────────────────────────────┘
+                             │
+                             ▼
+        ┌────────────────────────────────────────┐
+        │     🔐 KEYCLOAK (Port 8082)            │
+        │   Identity & Access Management (OIDC)  │
+        │                                         │
+        │  ├─ Realms: clinic                     │
+        │  ├─ Clients: gateway, user-service    │
+        │  ├─ Users: admin, doctor, nurse, user │
+        │  └─ Roles: ROLE_ADMIN, ROLE_USER      │
+        │                                         │
+        │  DB: PostgreSQL (keycloak-db)          │
+        │  Persistent: ./keycloak-data/ (Host)   │
+        └────────────────────────────────────────┘
+                             │
+                  (1. Request + Get Token)
+                             │
+                             ▼
+        ┌────────────────────────────────────────┐
+        │    🟡 API GATEWAY (Port 8080)          │
+        │   Spring Cloud Gateway + OAuth2        │
+        │                                         │
+        │  ├─ Route: /api/users → user-service  │
+        │  ├─ Route: /api/appointments → appt   │
+        │  ├─ OAuth2 Login (Keycloak)           │
+        │  └─ CORS Enabled                      │
+        │                                         │
+        │  Swagger: http://localhost:8080/...   │
+        └────────────────────────────────────────┘
+                    │                 │
+        (2a. gRPC)  │                 │  (2b. REST)
+                    ▼                 ▼
+        ┌──────────────────────┐  ┌──────────────────────┐
+        │ 🟢 USER SERVICE      │  │ 📅 APPOINTMENT SVC   │
+        │ (Port 9090)          │  │ (Port 8081)          │
+        │                      │  │                      │
+        │ REST Endpoints:      │  │ REST Endpoints:      │
+        │ ├─ GET /users       │  │ ├─ GET /appts       │
+        │ ├─ POST /users      │  │ ├─ POST /appts      │
+        │ ├─ PUT /users/{id}  │  │ ├─ PUT /appts/{id}  │
+        │ └─ DELETE /users/{} │  │ ├─ DELETE /appts/{} │
+        │                      │  │ └─ GET /appts/my    │
+        │ gRPC Service:        │  │                      │
+        │ └─ UserService      │  │ gRPC Service:        │
+        │                      │  │ └─ AppointmentSvc   │
+        │ Security: JWT Bearer │  │                      │
+        │ Swagger: :9090/...  │  │ Security: JWT Bearer │
+        │                      │  │ Swagger: :8081/...  │
+        │                      │  │                      │
+        │ DB: PostgreSQL       │  │ DB: PostgreSQL       │
+        │ Schema: clinic       │  │ Schema: clinic       │
+        └──────────────────────┘  └──────────────────────┘
+                    │                      │
+                    └──────────┬───────────┘
+                               │
+                    (Register en Eureka)
+                               │
+                               ▼
+        ┌────────────────────────────────────────┐
+        │    🔷 EUREKA SERVER (Port 8761)        │
+        │    Service Registry & Discovery        │
+        │                                         │
+        │  Registered Services:                  │
+        │  ├─ api-gateway (Port 8080)           │
+        │  ├─ user-service (Port 9090)          │
+        │  └─ appointment-service (Port 8081)   │
+        │                                         │
+        │  Credentials: eureka / eureka123      │
+        │  UI: http://localhost:8761           │
+        └────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                           📊 FLOW DE AUTENTICACION                             ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+1️⃣  USER REQUEST
+    Browser → http://localhost:8080/api/users
+
+2️⃣  GATEWAY REDIRECT
+    API Gateway → Keycloak (OIDC Login)
+    ├─ Client ID: gateway
+    └─ Redirect URI: http://localhost:8080/login/oauth2/code/keycloak
+
+3️⃣  KEYCLOAK AUTH
+    User enters: testuser@clinic.com / password
+    ↓
+    Keycloak generates JWT Token
+    ↓
+    Redirect back to Gateway with code
+
+4️⃣  TOKEN EXCHANGE
+    Gateway exchanges code for access_token
+    ├─ Client: gateway
+    ├─ Client Secret: kn6qXopbH5jqx26zFdyS1odEE6nVSDr4
+    └─ Returns: JWT Bearer Token
+
+5️⃣  API CALL WITH TOKEN
+    curl -H "Authorization: Bearer <JWT_TOKEN>" \
+         http://localhost:8080/api/users
+
+6️⃣  GATEWAY VALIDATES & ROUTES
+    ├─ Validates JWT signature (jwk-set-uri from Keycloak)
+    ├─ Extracts claims (roles, sub, etc)
+    └─ Forwards request to User Service / Appointment Service
+
+7️⃣  MICROSERVICE VALIDATES
+    User Service / Appointment Service
+    ├─ Validates JWT again (resource server)
+    ├─ Checks authorization (@PreAuthorize)
+    └─ Returns data
+
+8️⃣  RESPONSE
+    Data → Gateway → Client
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                        🗄️ BASES DE DATOS & VOLÚMENES                          ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+USER SERVICE DATABASE
+├─ Host: user-service-db (Docker)
+├─ Port: 5432
+├─ Database: postgres
+├─ User: postgres / clinic_password
+├─ Schema: clinic
+├─ Tables:
+│  ├─ users (id, nombre, apellido, correo, telefono, role, ...)
+│  └─ Índices: idx_users_correo, idx_users_role
+└─ Volume: user_service_db_data (Docker Named Volume - Persistente)
+
+APPOINTMENT SERVICE DATABASE
+├─ Host: appointment-service-db (Docker)
+├─ Port: 5432
+├─ Database: postgres
+├─ User: postgres / clinic_password
+├─ Schema: clinic
+├─ Tables:
+│  ├─ appointments (id, user_id, doctor_id, fecha, estado, ...)
+│  ├─ appointment_statuses (PENDING, CONFIRMED, CANCELLED, COMPLETED)
+│  └─ Índices: idx_appointments_user, idx_appointments_doctor
+└─ Volume: appointment_service_db_data (Docker Named Volume - Persistente)
+
+KEYCLOAK DATABASE
+├─ Host: keycloak-db (Docker)
+├─ Port: 5432
+├─ Database: keycloak
+├─ User: keycloak / keycloak_password
+├─ Storage: Realms, Clients, Users, Roles
+└─ Volume: ./keycloak-data/ (HOST MOUNT - Persistente en c:\...\keycloak-data\)
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                      🐳 DOCKER NETWORK & CONTAINERS                           ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+Network: microservices-net (bridge)
+└─ Todos los contenedores conectados en la misma red interna
+
+Contenedores (8 total):
+├─ 🔐 keycloak-db (postgres:15-alpine)
+├─ 🔐 keycloak (quay.io/keycloak/keycloak:24.0)
+├─ 🔷 eureka-server (openjdk:21 + Spring Boot)
+├─ 🟡 api-gateway (openjdk:21 + Spring Cloud Gateway)
+├─ 🟢 user-service-db (postgres:15-alpine)
+├─ 🟢 user-service (openjdk:21 + Spring Boot)
+├─ 📅 appointment-service-db (postgres:15-alpine)
+└─ 📅 appointment-service (openjdk:21 + Spring Boot)
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                         🔌 PUERTOS EXPUESTOS                                   ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+Keycloak               8082:8080    (OIDC Provider)
+API Gateway            8080:8080    (Main Entry Point)
+User Service           9090:9090    (REST + gRPC)
+Appointment Service    8081:8081    (REST + gRPC)
+Eureka Server          8761:8761    (Service Discovery)
+
+PostgreSQL Ports (Internal - no expuesto):
+  user-service-db:      5432
+  appointment-service-db: 5432
+  keycloak-db:          5432
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                      📡 COMUNICACIÓN ENTRE SERVICIOS                           ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+OPCIÓN 1: REST (Síncrono)
+  API Gateway → (HTTP + Bearer Token) → User Service / Appointment Service
+
+OPCIÓN 2: gRPC (Asíncrono + Eficiente)
+  User Service ←→ (gRPC) ←→ Appointment Service
+  (Ej: Appointment Service puede llamar User Service para validar usuario)
+
+OPCIÓN 3: Service Discovery (Eureka)
+  Todos los servicios se registran en Eureka
+  ├─ Eureka proporciona URLs dinámicas
+  ├─ Load balancing automático
+  └─ Health checks periódicos
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    ✅ ESTADO ACTUAL (2025-11-26)                              ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+✅ COMPLETADO:
+  ✓ Docker + Docker Compose (8 contenedores)
+  ✓ Keycloak (OIDC + OAuth2)
+  ✓ Spring Security (JWT + Bearer Token)
+  ✓ Eureka Server (Service Discovery)
+  ✓ API Gateway (Cloud Gateway + OAuth2)
+  ✓ User Service (REST + gRPC + JPA)
+  ✓ Appointment Service (REST + gRPC + JPA)
+  ✓ PostgreSQL (3 bases de datos)
+  ✓ Protobuf/gRPC Compilation
+  ✓ Swagger/OpenAPI
+  ✓ Maven Multi-Module Build
+  ✓ Persistent Volumes (Data no se pierde al hacer docker-compose down)
+  ✓ CORS Enabled
+  ✓ Health Checks
+
+⚠️  EN PROGRESO:
+  ○ Verificar que todos los containers se inicien correctamente
+  ○ Probar endpoints REST
+  ○ Probar gRPC services
+  ○ Probar flujo de autenticación completo
+
+📋 PRÓXIMOS PASOS:
+  □ Crear más servicios (clinic-service, doctor-service, etc.)
+  □ Implementar Circuit Breaker (Resilience4j)
+  □ Agregar logging centralizado (ELK Stack)
+  □ Implementar API Rate Limiting
+  □ Añadir métricas Prometheus/Grafana
+  □ Configurar CI/CD (GitHub Actions)
+  □ Desplegar a Kubernetes
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    🧪 COMANDOS ÚTILES PARA TESTING                            ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+# Ver estado de los servicios
+docker-compose ps
+
+# Ver logs de un servicio
+docker logs appointment-service -f
+
+# Obtener token de Keycloak
+curl -X POST "http://localhost:8082/realms/clinic/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password&client_id=gateway&username=testuser@clinic.com&password=testuser123"
+
+# Llamar API con token
+curl -H "Authorization: Bearer <TOKEN>" http://localhost:9090/api/users
+
+# Ver Eureka
+http://localhost:8761 (eureka / eureka123)
+
+# Ver Swagger
+http://localhost:9090/swagger-ui.html (User Service)
+http://localhost:8081/swagger-ui.html (Appointment Service)
+http://localhost:8080/swagger-ui.html (Gateway)
+
+# Reiniciar todos
+docker-compose down
+docker-compose up -d
+
+# Reiniciar con rebuild
+docker-compose down
+docker-compose up -d --build

@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: appointment-service
+  datasource:
+    url: jdbc:postgresql://appointment-service-db:5432/appointments
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/clinic
+          jwk-set-uri: http://keycloak:8080/realms/clinic/protocol/openid-connect/certs
+
+server:
+  port: 9091
+  servlet:
+    context-path: /
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka:eureka123@eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: appointment-service
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+
+logging:
+  level:
+    root: INFO
+    com.clinic: DEBUG
+    org.springframework.security: DEBUG

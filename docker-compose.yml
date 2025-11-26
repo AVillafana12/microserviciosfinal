@@ -78,12 +78,56 @@ services:
     networks:
       - microservices-net
 
+  # ============= PostgreSQL for appointment-service =============
+  appointment-service-db:
+    image: postgres:15-alpine
+    container_name: appointment-service-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: appointments
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - appointment_service_db_data:/var/lib/postgresql/data
+      - ./appointment-service/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============= Appointment Service =============
+  appointment-service:
+    build:
+      context: .
+      dockerfile: appointment-service/Dockerfile
+    container_name: appointment-service
+    restart: unless-stopped
+    ports:
+      - "9091:9091"
+      - "9092:9092"
+    depends_on:
+      appointment-service-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    environment:
+      JAVA_OPTS: "-Xmx512m -Xms256m"
+    networks:
+      - microservices-net
+
   # ============= Keycloak =============
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     container_name: keycloak
     restart: unless-stopped
-    command: 
+    command:
       - start-dev
     environment:
       KEYCLOAK_ADMIN: admin
@@ -95,13 +139,43 @@ services:
     networks:
       - microservices-net
 
+  # ============= Image Service =============
+  image-service:
+    build:
+      context: ./image-service
+      dockerfile: Dockerfile
+    container_name: image-service
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      - eureka-server
+      - user-service-db
+    volumes:
+      - image_service_data:/data/images
+    networks:
+      - microservices-net
+
+  # ============= Adminer (UI para PostgreSQL) =============
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: unless-stopped
+    ports:
+      - "8084:8080"
+    depends_on:
+      - user-service-db
+      - appointment-service-db
+    networks:
+      - microservices-net
+
 # ============= Volumes =============
 volumes:
   user_service_db_data:
-    driver: local
+  appointment_service_db_data:
+  image_service_data:
 
 # ============= Networks =============
 networks:
   microservices-net:
     driver: bridge
-

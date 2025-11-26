@@ -19,7 +19,8 @@
 		<module>gateway</module>
 		<module>eureka_server</module>
 		<module>user-service</module>
-		 <!-- lookup parent from repository <module>clinic-appointment-service</module> -->
+		<module>appointment-service</module>
+		<module>image-service</module>
 	</modules>
 
 
