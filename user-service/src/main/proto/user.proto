@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.clinic.user.proto";
+option java_outer_classname = "UserProto";
+
+service UserServiceGrpc {
+  rpc GetUserById (GetUserRequest) returns (UserResponse);
+  rpc ListUsers (Empty) returns (UserListResponse);
+}
+
+message Empty {}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message UserResponse {
+  string id = 1;
+  string nombre = 2;
+  string apellido = 3;
+  string correo = 4;
+  string telefono = 5;
+  string role = 6;
+}
+
+message UserListResponse {
+  repeated UserResponse users = 1;
+}

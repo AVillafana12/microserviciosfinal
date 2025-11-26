@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:postgresql://user-service-db:5432/postgres
+    username: postgres
+    password: clinic_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/clinic
+          jwk-set-uri: http://keycloak:8080/realms/clinic/protocol/openid-connect/certs
+
+server:
+  port: 9090
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:eureka123@eureka-server:8761/eureka/
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 10

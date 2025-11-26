@@ -1,0 +1,30 @@
+version: '3.9'
+
+# Este archivo puede ser usado para overrides en desarrollo local
+# Uso: docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+
+services:
+  # Override para user-service en desarrollo
+  user-service:
+    environment:
+      SPRING_JPA_SHOW_SQL: "true"
+      LOGGING_LEVEL_ROOT: "DEBUG"
+      LOGGING_LEVEL_COM_CLINIC: "DEBUG"
+    ports:
+      - "5005:5005"  # Debug port
+    volumes:
+      - ./user-service/src:/app/src  # Hot reload en desarrollo
+
+  # Override para gateway en desarrollo
+  gateway:
+    environment:
+      LOGGING_LEVEL_ROOT: "DEBUG"
+      LOGGING_LEVEL_COM_CLINIC: "DEBUG"
+    ports:
+      - "5006:5006"  # Debug port
+
+  # Override para eureka en desarrollo
+  eureka-server:
+    environment:
+      LOGGING_LEVEL_ROOT: "DEBUG"
+      EUREKA_SERVER_ENABLE_SELF_PRESERVATION: "false"

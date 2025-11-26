@@ -1,37 +1,40 @@
 spring:
   application:
-    name: gateway
-    
+    name: api-gateway
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: gateway
+            client-secret: kn6qXopbH5jqx26zFdyS1odEE6nVSDr4
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+            scope: openid,profile,email
+        provider:
+          keycloak:
+            issuer-uri: http://keycloak:8080/realms/clinic
+            user-name-attribute: preferred_username
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/clinic
+          jwk-set-uri: http://keycloak:8080/realms/clinic/protocol/openid-connect/certs
+
 server:
   port: 8080
 
-spring:
-  application:
-    name: gateway
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:eureka123@eureka-server:8761/eureka/
+  instance:
+    preferIpAddress: true
 
-  cloud:
-    gateway:
-      default-filters:
-        - TokenRelay
-      discovery:
-        locator:
-          enabled: true
-      routes:
-        - id: users-service
-          uri: lb://users-service
-          predicates:
-            - Path=/users/**
-          filters:
-            - RemoveRequestHeader=Cookie
-
-security:
-  oauth2:
-    client:
-      provider:
-        keycloak:
-          issuer-uri: http://localhost:8081/realms/microservices
-      registration:
-        keycloak:
-          client-id: gateway
-          client-secret: 4565kHZTmtlp2fThZCJcHauANnWhmBwp
-          scope: openid, profile, roles
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

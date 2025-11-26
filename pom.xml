@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.clinic</groupId>
-	<artifactId>clinic</artifactId>
+	<artifactId>clinic-parent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>clinic-parent</name>
@@ -18,8 +18,8 @@
 	<modules>
 		<module>gateway</module>
 		<module>eureka_server</module>
-		<module>clinic-patient-service</module>
-		<module>clinic-appointment-service</module>
+		<module>user-service</module>
+		 <!-- lookup parent from repository <module>clinic-appointment-service</module> -->
 	</modules>
 
 
