@@ -78,6 +78,24 @@
             document.getElementById('createForm').style.display = 'none';
         }
 
+        async function ensureUserExists() {
+            const token = getToken();
+            if (!token) return false;
+
+            try {
+                await fetch(`${API_GATEWAY}/api/users/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                return true;
+            } catch(e) {
+                console.error('Error al verificar usuario:', e);
+                return false;
+            }
+        }
+
         async function fetchAppointments() {
             const token = getToken();
             if (!token) {
@@ -87,6 +105,8 @@
 
             try {
                 showLoading();
+                await ensureUserExists();
+                
                 const res = await fetch(`${API_GATEWAY}/api/appointments`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -156,8 +176,11 @@
         }
 
         // Verificar autenticación al cargar
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             updateAuthStatus();
+            if (getToken()) {
+                await ensureUserExists();
+            }
         });
     </script>
 </body>

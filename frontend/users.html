@@ -66,6 +66,25 @@
             document.getElementById('createForm').style.display = 'none';
         }
 
+        async function ensureUserExists() {
+            const token = getToken();
+            if (!token) return false;
+
+            try {
+                // Llamar a /me para crear/obtener el usuario desde Keycloak
+                await fetch(`${API_GATEWAY}/api/users/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                return true;
+            } catch(e) {
+                console.error('Error al verificar usuario:', e);
+                return false;
+            }
+        }
+
         async function fetchUsers() {
             const token = getToken();
             if (!token) {
@@ -75,6 +94,10 @@
 
             try {
                 showLoading();
+                
+                // Asegurar que el usuario existe en la BD
+                await ensureUserExists();
+                
                 const res = await fetch(`${API_GATEWAY}/api/users`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -141,8 +164,12 @@
         }
 
         // Verificar autenticación al cargar
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             updateAuthStatus();
+            // Crear usuario automáticamente al cargar la página si está autenticado
+            if (getToken()) {
+                await ensureUserExists();
+            }
         });
     </script>
 </body>
