@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments Service - Clinic</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Volver</a>
+        
+        <h1>📅 Appointments Service</h1>
+        
+        <div class="auth-status" id="authStatus"></div>
+
+        <div class="card">
+            <h3>Acciones</h3>
+            <div class="button-group">
+                <button onclick="fetchAppointments()" class="btn-primary">📋 Get All Appointments</button>
+                <button onclick="showCreateForm()" class="btn-secondary">➕ Create Appointment</button>
+            </div>
+        </div>
+
+        <div id="createForm" class="card" style="display: none;">
+            <h3>Crear Cita</h3>
+            <form onsubmit="createAppointment(event)">
+                <div class="form-group">
+                    <label>Patient ID:</label>
+                    <input type="text" id="patientId" required>
+                </div>
+                <div class="form-group">
+                    <label>Patient Name:</label>
+                    <input type="text" id="patientName" required>
+                </div>
+                <div class="form-group">
+                    <label>Doctor ID:</label>
+                    <input type="text" id="doctorId" required>
+                </div>
+                <div class="form-group">
+                    <label>Doctor Name:</label>
+                    <input type="text" id="doctorName" required>
+                </div>
+                <div class="form-group">
+                    <label>Specialty:</label>
+                    <input type="text" id="specialty" required>
+                </div>
+                <div class="form-group">
+                    <label>Appointment Date:</label>
+                    <input type="datetime-local" id="appointmentDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="description" rows="3"></textarea>
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">Crear</button>
+                    <button type="button" onclick="hideCreateForm()" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Resultado</h3>
+            <pre id="result" class="result-box">Haz clic en "Get All Appointments" para ver las citas...</pre>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        const API_GATEWAY = 'http://localhost:8080';
+
+        function showCreateForm() {
+            document.getElementById('createForm').style.display = 'block';
+        }
+
+        function hideCreateForm() {
+            document.getElementById('createForm').style.display = 'none';
+        }
+
+        async function fetchAppointments() {
+            const token = getToken();
+            if (!token) {
+                showError('No estás autenticado. Ve a Login primero.');
+                return;
+            }
+
+            try {
+                showLoading();
+                const res = await fetch(`${API_GATEWAY}/api/appointments`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                
+                const data = await res.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch(e) {
+                showError('Error al obtener citas: ' + e.message);
+            }
+        }
+
+        async function createAppointment(event) {
+            event.preventDefault();
+            const token = getToken();
+            if (!token) {
+                showError('No estás autenticado. Ve a Login primero.');
+                return;
+            }
+
+            const appointmentData = {
+                patientId: document.getElementById('patientId').value,
+                patientName: document.getElementById('patientName').value,
+                doctorId: document.getElementById('doctorId').value,
+                doctorName: document.getElementById('doctorName').value,
+                specialty: document.getElementById('specialty').value,
+                appointmentDate: document.getElementById('appointmentDate').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                showLoading();
+                const res = await fetch(`${API_GATEWAY}/api/appointments`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(appointmentData)
+                });
+                
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                
+                const data = await res.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+                hideCreateForm();
+                event.target.reset();
+            } catch(e) {
+                showError('Error al crear cita: ' + e.message);
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('result').textContent = 'Cargando...';
+        }
+
+        function showError(message) {
+            document.getElementById('result').textContent = `❌ ${message}`;
+        }
+
+        // Verificar autenticación al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            updateAuthStatus();
+        });
+    </script>
+</body>
+</html>

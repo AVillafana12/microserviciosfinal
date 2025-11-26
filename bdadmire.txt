@@ -1,0 +1,16 @@
+Con Adminer (web en http://localhost:8084 — Adminer corre en un contenedor y por eso debe usar el nombre del servicio como servidor)
+Motor: PostgreSQL
+Para la BD de users (user-service-db)
+Servidor: user-service-db
+Usuario: clinic_user
+Contraseña: clinic_password
+Base de datos: clinic
+Puerto: 5432 (si te lo pide)
+
+
+Para la BD de citas (appointment-service-db)
+Servidor: appointment-service-db
+Usuario: postgres
+Contraseña: postgres
+Base de datos: appointments
+Puerto: 5432

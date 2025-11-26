@@ -169,6 +169,21 @@ services:
     networks:
       - microservices-net
 
+  # ============= Frontend (HTML/JS estático con Nginx) =============
+  frontend:
+    image: nginx:alpine
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "8090:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - gateway
+      - keycloak
+    networks:
+      - microservices-net
+
 # ============= Volumes =============
 volumes:
   user_service_db_data:

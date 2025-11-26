@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Microservices</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Clinic Microservices - Test UI</h1>
+        <p class="subtitle">Sistema de gestión de clínicas con microservicios</p>
+        
+        <nav class="nav-grid">
+            <a href="login.html" class="nav-card">
+                <span class="icon">🔐</span>
+                <h3>Login</h3>
+                <p>Autenticación con Keycloak</p>
+            </a>
+            <a href="users.html" class="nav-card">
+                <span class="icon">👤</span>
+                <h3>Users Service</h3>
+                <p>Gestión de usuarios</p>
+            </a>
+            <a href="appointments.html" class="nav-card">
+                <span class="icon">📅</span>
+                <h3>Appointments</h3>
+                <p>Gestión de citas médicas</p>
+            </a>
+            <a href="images.html" class="nav-card">
+                <span class="icon">🖼️</span>
+                <h3>Images Service</h3>
+                <p>Upload y gestión de imágenes</p>
+            </a>
+        </nav>
+
+        <div id="status" class="status-info"></div>
+        
+        <footer>
+            <p>API Gateway: <code>http://localhost:8080</code></p>
+            <p>Eureka Dashboard: <a href="http://localhost:8761" target="_blank">http://localhost:8761</a></p>
+            <p>Keycloak Admin: <a href="http://localhost:8082" target="_blank">http://localhost:8082</a></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Verificar estado del gateway al cargar
+        checkGatewayStatus();
+    </script>
+</body>
+</html>

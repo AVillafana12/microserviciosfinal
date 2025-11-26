@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Clinic</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Volver</a>
+        
+        <h1>🔐 Login con Keycloak</h1>
+        
+        <div class="card">
+            <div id="loginStatus" class="status-info"></div>
+            
+            <div id="loginForm">
+                <h3>Autenticación</h3>
+                <p>Haz clic para iniciar sesión con Keycloak:</p>
+                <button onclick="loginWithKeycloak()" class="btn-primary">Login con Keycloak</button>
+                
+                <div class="info-box">
+                    <h4>Credenciales por defecto:</h4>
+                    <p><strong>Usuario:</strong> admin</p>
+                    <p><strong>Password:</strong> admin</p>
+                    <p class="note">Estas son las credenciales del admin de Keycloak. Configura un realm y cliente para usar OAuth2.</p>
+                </div>
+            </div>
+
+            <div id="userInfo" style="display: none;">
+                <h3>✅ Sesión activa</h3>
+                <pre id="tokenInfo"></pre>
+                <button onclick="logout()" class="btn-secondary">Cerrar sesión</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📋 Configuración de Keycloak</h3>
+            <ol>
+                <li>Accede a <a href="http://localhost:8082" target="_blank">Keycloak Admin</a></li>
+                <li>Crea un nuevo Realm (ej: "clinic")</li>
+                <li>Crea un cliente público:
+                    <ul>
+                        <li><strong>Client ID:</strong> clinic-frontend</li>
+                        <li><strong>Client Type:</strong> Public</li>
+                        <li><strong>Valid Redirect URIs:</strong> http://localhost:8090/*</li>
+                        <li><strong>Web Origins:</strong> http://localhost:8090</li>
+                    </ul>
+                </li>
+                <li>Crea usuarios de prueba en el realm</li>
+                <li>Actualiza la configuración en <code>app.js</code> con tu realm y client ID</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Verificar si ya hay un token
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAuthStatus();
+        });
+    </script>
+</body>
+</html>
