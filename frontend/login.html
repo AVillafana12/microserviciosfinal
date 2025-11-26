@@ -17,14 +17,29 @@
             
             <div id="loginForm">
                 <h3>Autenticación</h3>
-                <p>Haz clic para iniciar sesión con Keycloak:</p>
-                <button onclick="loginWithKeycloak()" class="btn-primary">Login con Keycloak</button>
+                
+                <!-- Login con usuario/contraseña -->
+                <form onsubmit="handleLogin(event)" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Usuario:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Iniciar Sesión</button>
+                </form>
+                
+                <div class="divider">o</div>
+                
+                <button onclick="loginWithKeycloak()" class="btn-secondary">Login con Keycloak (OAuth2)</button>
                 
                 <div class="info-box">
-                    <h4>Credenciales por defecto:</h4>
-                    <p><strong>Usuario:</strong> admin</p>
-                    <p><strong>Password:</strong> admin</p>
-                    <p class="note">Estas son las credenciales del admin de Keycloak. Configura un realm y cliente para usar OAuth2.</p>
+                    <h4>Credenciales de prueba:</h4>
+                    <p><strong>Usuario:</strong> test</p>
+                    <p><strong>Password:</strong> test</p>
+                    <p class="note">Asegúrate de crear este usuario en Keycloak realm "clinic"</p>
                 </div>
             </div>
 
@@ -56,6 +71,28 @@
 
     <script src="app.js"></script>
     <script>
+        // Handler para el formulario de login
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const statusDiv = document.getElementById('loginStatus');
+            
+            statusDiv.innerHTML = '<p class="info">⏳ Iniciando sesión...</p>';
+            
+            const result = await loginWithPassword(username, password);
+            
+            if (result.success) {
+                statusDiv.innerHTML = '<p class="success">✅ Login exitoso! Redirigiendo...</p>';
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            } else {
+                statusDiv.innerHTML = `<p class="error">❌ Error: ${result.error}</p>`;
+            }
+        }
+        
         // Verificar si ya hay un token
         window.addEventListener('DOMContentLoaded', () => {
             checkAuthStatus();

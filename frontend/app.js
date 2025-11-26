@@ -1,8 +1,9 @@
 // app.js - Funciones comunes para autenticación y gestión de tokens
 
 const KEYCLOAK_URL = 'http://localhost:8082';
-const KEYCLOAK_REALM = 'clinic'; // Cambia esto según tu realm
-const KEYCLOAK_CLIENT_ID = 'clinic-frontend'; // Cambia esto según tu cliente
+const KEYCLOAK_REALM = 'clinic';
+const KEYCLOAK_CLIENT_ID = 'clinic-frontend';
+const KEYCLOAK_CLIENT_SECRET = 'gS3x7bDRltiBipTa28467qm3cESJQn9R';
 const API_GATEWAY = 'http://localhost:8080';
 
 // Obtener token del localStorage
@@ -22,31 +23,51 @@ function clearToken() {
     localStorage.removeItem('token_expiry');
 }
 
-// Login con Keycloak (flujo simplificado - en producción usar PKCE)
+// Login con Keycloak usando Password Grant (para desarrollo/testing)
+async function loginWithPassword(username, password) {
+    try {
+        const formData = new URLSearchParams();
+        formData.append('client_id', KEYCLOAK_CLIENT_ID);
+        formData.append('client_secret', KEYCLOAK_CLIENT_SECRET);
+        formData.append('username', username);
+        formData.append('password', password);
+        formData.append('grant_type', 'password');
+        
+        const response = await fetch(`${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error_description || 'Login failed');
+        }
+        
+        const data = await response.json();
+        saveToken(data.access_token);
+        if (data.refresh_token) {
+            localStorage.setItem('refresh_token', data.refresh_token);
+        }
+        if (data.expires_in) {
+            const expiry = Date.now() + (data.expires_in * 1000);
+            localStorage.setItem('token_expiry', expiry.toString());
+        }
+        
+        return { success: true, data };
+    } catch (error) {
+        console.error('Login error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Login con Keycloak (flujo Authorization Code - producción)
 function loginWithKeycloak() {
-    // Nota: Este es un flujo simplificado. En producción deberías usar:
-    // - Authorization Code Flow con PKCE
-    // - Una librería como keycloak-js
-    
-    alert('⚠️ Configuración necesaria:\n\n' +
-          '1. Crea un realm "clinic" en Keycloak\n' +
-          '2. Crea un cliente público "clinic-frontend"\n' +
-          '3. Configura Valid Redirect URIs: http://localhost:8090/*\n' +
-          '4. Para pruebas rápidas, puedes obtener un token manualmente:\n' +
-          '   - Ve a Keycloak Admin Console\n' +
-          '   - Crea un usuario de prueba\n' +
-          '   - Usa Postman o curl para obtener un token\n\n' +
-          'Comando curl de ejemplo:\n' +
-          'curl -X POST "http://localhost:8082/realms/clinic/protocol/openid-connect/token" \\\n' +
-          '  -d "client_id=clinic-frontend" \\\n' +
-          '  -d "username=tu_usuario" \\\n' +
-          '  -d "password=tu_password" \\\n' +
-          '  -d "grant_type=password"');
-    
-    // Redirigir a Keycloak (comentado porque necesita configuración)
-    // const redirectUri = encodeURIComponent(window.location.origin + '/login.html');
-    // const authUrl = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/auth?client_id=${KEYCLOAK_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=openid`;
-    // window.location.href = authUrl;
+    const redirectUri = encodeURIComponent(window.location.origin + '/login.html');
+    const authUrl = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/auth?client_id=${KEYCLOAK_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=openid`;
+    window.location.href = authUrl;
 }
 
 // Logout
@@ -140,7 +161,8 @@ function setTestToken(token) {
     alert('Token guardado. Recarga la página.');
 }
 
-// Exponer función en consola para testing
+// Exponer funciones en consola para testing
 if (typeof window !== 'undefined') {
     window.setTestToken = setTestToken;
+    window.loginWithPassword = loginWithPassword;
 }

@@ -3,14 +3,13 @@ FROM maven:3.9-eclipse-temurin-21 AS builder
 
 WORKDIR /build
 
-# Copy pom and source
-COPY pom.xml ../pom.xml
-COPY gateway/pom.xml .
+# Copy gateway pom and source only
+COPY gateway/pom.xml ./pom.xml
 COPY gateway/src ./src
 COPY gateway/src/main/proto ./src/main/proto
 
 # Build the application
-RUN mvn -pl :gateway -am clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-jammy

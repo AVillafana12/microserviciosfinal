@@ -4,10 +4,21 @@ server:
 spring:
   application:
     name: eureka-server
+  security:
+    user:
+      name: ${SPRING_SECURITY_USER_NAME:eureka}
+      password: ${SPRING_SECURITY_USER_PASSWORD:eureka123}
 
 eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+    service-url:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@localhost:8761/eureka/
   server:
     enable-self-preservation: false
+    
+# Disable CSRF for Eureka endpoints
+management:
+  security:
+    enabled: false
