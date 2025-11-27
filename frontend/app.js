@@ -85,7 +85,8 @@ async function fetchWithAuth(url, options = {}) {
         ...options,
         headers,
         mode: 'cors',
-        credentials: 'omit'
+        credentials: 'omit',
+        cache: 'no-cache'
     };
 
     console.log('🌐 Fetching:', url);
@@ -204,10 +205,10 @@ async function checkGatewayStatus() {
             method: 'GET',
             mode: 'cors',
             headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Accept': 'application/json'
             },
-            credentials: 'omit'
+            credentials: 'omit',
+            cache: 'no-cache'
         });
         
         if (res.ok) {

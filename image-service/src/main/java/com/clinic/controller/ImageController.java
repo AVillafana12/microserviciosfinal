@@ -1,5 +1,6 @@
 package com.clinic.controller;
 
+import com.clinic.grpc.UserGrpcClient;
 import com.clinic.image_service.entity.UserImage;
 import com.clinic.service.ImagesService;
 import org.springframework.http.HttpHeaders;
@@ -22,19 +23,19 @@ import java.util.stream.Collectors;
 public class ImageController {
 
     private final ImagesService imagesService;
+    private final UserGrpcClient userGrpcClient;
 
-    public ImageController(ImagesService imagesService) {
+    public ImageController(ImagesService imagesService, UserGrpcClient userGrpcClient) {
         this.imagesService = imagesService;
+        this.userGrpcClient = userGrpcClient;
     }
 
     private Integer getUserIdFromAuth(Authentication authentication) {
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            Object userIdClaim = jwt.getClaim("user_id");
-            if (userIdClaim != null) {
-                return Integer.valueOf(userIdClaim.toString());
-            }
+            String keycloakId = jwt.getSubject();
+            return userGrpcClient.getUserIdByKeycloakId(keycloakId);
         }
-        throw new RuntimeException("User ID not found in token");
+        throw new RuntimeException("Invalid authentication");
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

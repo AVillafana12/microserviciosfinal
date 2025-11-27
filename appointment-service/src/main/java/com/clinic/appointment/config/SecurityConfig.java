@@ -51,6 +51,8 @@ public class SecurityConfig {
                 "http://localhost:8080",
                 "http://localhost:8081",
                 "http://localhost:8082",
+                "http://localhost:8090",
+                "http://127.0.0.1:8090",
                 "http://localhost:9091",
                 "http://localhost:9090"
         ));

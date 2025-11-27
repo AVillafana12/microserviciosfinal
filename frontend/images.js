@@ -1,7 +1,5 @@
 // images.js - Lógica para gestión de imágenes
 
-const API_GATEWAY = 'http://localhost:8080';
-
 // Preview de imagen antes de upload
 function initImagePreview() {
     const fileInput = document.getElementById('imageFile');
@@ -85,20 +83,31 @@ async function fetchImages() {
         
         const images = await fetchWithAuth(`${API_GATEWAY}/api/images`);
         
-        if (images.length === 0) {
-            document.getElementById('imageList').innerHTML = '<p>No hay imágenes aún.</p>';
+        if (!images || images.length === 0) {
+            document.getElementById('imageList').innerHTML = '<p>No hay imágenes aún. Sube tu primera imagen usando el formulario arriba.</p>';
             return;
         }
         
-        document.getElementById('imageList').innerHTML = images.map(img => `
-            <div class="image-item">
-                <img src="${API_GATEWAY}/api/images/${img.id}" alt="${img.name || img.id}">
-                <p>${img.name || img.id}</p>
+        document.getElementById('imageList').innerHTML = `
+            <div class="image-gallery">
+                ${images.map(img => `
+                    <div class="image-item">
+                        <img src="${API_GATEWAY}/api/images/${img.id}" 
+                             alt="${img.name || img.id}"
+                             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22>Error</text></svg>'">
+                        <p><strong>${img.name || 'Sin nombre'}</strong></p>
+                        <small>${(img.size / 1024).toFixed(2)} KB</small><br>
+                        <small>${new Date(img.uploadedAt).toLocaleString()}</small>
+                    </div>
+                `).join('')}
             </div>
-        `).join('');
+        `;
     } catch(e) {
+        console.error('Error al cargar imágenes:', e);
         document.getElementById('imageList').innerHTML = 
-            `<p class="error">❌ Error al cargar imágenes: ${e.message}</p>`;
+            `<p class="error">❌ Error al cargar imágenes: ${e.message}</p>
+             <p class="warning">Nota: Si el servicio de imágenes está teniendo problemas de autenticación, 
+             es posible que necesites verificar la configuración de seguridad.</p>`;
     }
 }
 

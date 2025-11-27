@@ -36,10 +36,28 @@
 
         <div id="status" class="status-info"></div>
         
+        <div class="card">
+            <h3>ℹ️ Información del Sistema</h3>
+            <p><strong>Arquitectura:</strong> Microservicios con Spring Boot, Eureka, API Gateway y Keycloak</p>
+            <p><strong>Servicios disponibles:</strong></p>
+            <ul>
+                <li>👤 <strong>User Service:</strong> Gestión de usuarios con gRPC (REST + gRPC puerto 9091)</li>
+                <li>📅 <strong>Appointment Service:</strong> Gestión de citas médicas (gRPC habilitado)</li>
+                <li>🖼️ <strong>Image Service:</strong> Upload y almacenamiento de imágenes (integrado con User Service vía gRPC)</li>
+                <li>🌐 <strong>API Gateway:</strong> Puerto 8080 (Spring Cloud Gateway)</li>
+                <li>🔍 <strong>Eureka Server:</strong> Service Discovery en puerto 8761</li>
+                <li>🔐 <strong>Keycloak:</strong> Autenticación y autorización en puerto 8082</li>
+            </ul>
+            <p><strong>Usuarios de prueba:</strong></p>
+            <ul>
+                <li>Usuario: <code>test</code> / Password: <code>test</code></li>
+            </ul>
+        </div>
+        
         <footer>
             <p>API Gateway: <code>http://localhost:8080</code></p>
             <p>Eureka Dashboard: <a href="http://localhost:8761" target="_blank">http://localhost:8761</a></p>
-            <p>Keycloak Admin: <a href="http://localhost:8082" target="_blank">http://localhost:8082</a></p>
+            <p>Keycloak Admin: <a href="http://localhost:8082" target="_blank">http://localhost:8082</a> (admin/admin)</p>
         </footer>
     </div>
 

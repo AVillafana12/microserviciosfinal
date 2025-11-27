@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🔒 CORS Test</h1>
+    <button onclick="testCORS()">Test Gateway CORS</button>
+    <div id="results"></div>
+
+    <script>
+        async function testCORS() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Testing...</p>';
+            
+            const tests = [
+                { name: 'Actuator Health', url: 'http://localhost:8080/actuator/health' },
+                { name: 'API Users', url: 'http://localhost:8080/api/users', needsAuth: true }
+            ];
+            
+            let output = '';
+            
+            for (const test of tests) {
+                try {
+                    const headers = {
+                        'Accept': 'application/json'
+                    };
+                    
+                    if (test.needsAuth) {
+                        const token = localStorage.getItem('access_token');
+                        if (token) {
+                            headers['Authorization'] = `Bearer ${token}`;
+                        } else {
+                            output += `<div class="result error">❌ ${test.name}: No token found (go to login first)</div>`;
+                            continue;
+                        }
+                    }
+                    
+                    const response = await fetch(test.url, {
+                        method: 'GET',
+                        headers,
+                        mode: 'cors',
+                        credentials: 'omit'
+                    });
+                    
+                    const corsHeaders = {
+                        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+                    };
+                    
+                    output += `<div class="result success">
+                        ✅ ${test.name}: ${response.status} ${response.statusText}<br>
+                        CORS Headers: ${JSON.stringify(corsHeaders, null, 2)}
+                    </div>`;
+                } catch (error) {
+                    output += `<div class="result error">❌ ${test.name}: ${error.message}</div>`;
+                }
+            }
+            
+            results.innerHTML = output;
+        }
+        
+        // Auto-run on load
+        window.addEventListener('DOMContentLoaded', testCORS);
+    </script>
+</body>
+</html>

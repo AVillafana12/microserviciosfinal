@@ -26,18 +26,24 @@
             <h3>Crear Usuario</h3>
             <form onsubmit="createUser(event)">
                 <div class="form-group">
-                    <label>Nombre:</label>
-                    <input type="text" id="userName" required>
+                    <label>Nombre Completo:</label>
+                    <input type="text" id="userName" required placeholder="Ej: Juan Pérez">
+                    <small>El primer nombre se usará como "nombre" y el resto como "apellido"</small>
                 </div>
                 <div class="form-group">
                     <label>Email:</label>
-                    <input type="email" id="userEmail" required>
+                    <input type="email" id="userEmail" required placeholder="usuario@ejemplo.com">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono (opcional):</label>
+                    <input type="tel" id="userPhone" placeholder="+52 123 456 7890">
                 </div>
                 <div class="form-group">
                     <label>Role:</label>
                     <select id="userRole">
-                        <option value="PATIENT">PATIENT</option>
+                        <option value="USER">USER (Paciente)</option>
                         <option value="DOCTOR">DOCTOR</option>
+                        <option value="NURSE">NURSE (Enfermera)</option>
                         <option value="ADMIN">ADMIN</option>
                     </select>
                 </div>

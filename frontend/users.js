@@ -1,7 +1,5 @@
 // users.js - Lógica para gestión de usuarios
 
-const API_GATEWAY = 'http://localhost:8080';
-
 function showCreateForm() {
     document.getElementById('createForm').style.display = 'block';
 }
@@ -38,7 +36,19 @@ async function fetchUsers() {
         await ensureUserExists();
         
         const data = await fetchWithAuth(`${API_GATEWAY}/api/users`);
-        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        
+        // Formatear para mejor visualización
+        const formatted = data.map(user => ({
+            id: user.id,
+            nombre: user.nombre,
+            apellido: user.apellido,
+            correo: user.correo,
+            telefono: user.telefono || 'N/A',
+            role: user.role,
+            createdAt: user.createdAt ? new Date(user.createdAt).toLocaleString() : 'N/A'
+        }));
+        
+        document.getElementById('result').textContent = JSON.stringify(formatted, null, 2);
     } catch(e) {
         showError('Error al obtener usuarios: ' + e.message);
     }
@@ -53,8 +63,10 @@ async function createUser(event) {
     }
 
     const userData = {
-        name: document.getElementById('userName').value,
-        email: document.getElementById('userEmail').value,
+        nombre: document.getElementById('userName').value.split(' ')[0] || '',
+        apellido: document.getElementById('userName').value.split(' ').slice(1).join(' ') || '',
+        correo: document.getElementById('userEmail').value,
+        telefono: document.getElementById('userPhone')?.value || null,
         role: document.getElementById('userRole').value
     };
 

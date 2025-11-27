@@ -10,13 +10,21 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOriginPatterns: "*"
-            allowedMethods: "*"
+            allowedOrigins:
+              - "http://localhost:8090"
+              - "http://127.0.0.1:8090"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
             allowedHeaders: "*"
             allowCredentials: true
             exposedHeaders:
               - Authorization
               - Content-Type
+            maxAge: 3600
       routes:
         # User Service Routes
         - id: user-service
@@ -64,8 +72,13 @@ management:
         include: "*"
       base-path: /actuator
       cors:
-        allowed-origins: "*"
-        allowed-methods: "*"
+        allowed-origins:
+          - "http://localhost:8090"
+          - "http://127.0.0.1:8090"
+        allowed-methods:
+          - GET
+          - POST
+          - OPTIONS
         allowed-headers: "*"
         allow-credentials: true
   endpoint:

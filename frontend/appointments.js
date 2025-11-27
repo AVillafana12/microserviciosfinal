@@ -1,7 +1,5 @@
 // appointments.js - Lógica para gestión de citas
 
-const API_GATEWAY = 'http://localhost:8080';
-
 function showCreateForm() {
     document.getElementById('createForm').style.display = 'block';
 }
@@ -35,7 +33,20 @@ async function fetchAppointments() {
         await ensureUserExists();
         
         const data = await fetchWithAuth(`${API_GATEWAY}/api/appointments`);
-        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+        
+        // Formatear para mejor visualización
+        const formatted = data.map(apt => ({
+            id: apt.id,
+            paciente: `${apt.patientName} (ID: ${apt.patientId})`,
+            doctor: `${apt.doctorName} (ID: ${apt.doctorId})`,
+            especialidad: apt.specialty,
+            fecha: new Date(apt.appointmentDate).toLocaleString(),
+            estado: apt.status,
+            descripcion: apt.description,
+            creada: new Date(apt.createdAt).toLocaleString()
+        }));
+        
+        document.getElementById('result').textContent = JSON.stringify(formatted, null, 2);
     } catch(e) {
         showError('Error al obtener citas: ' + e.message);
     }

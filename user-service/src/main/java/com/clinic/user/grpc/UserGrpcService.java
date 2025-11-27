@@ -46,6 +46,33 @@ public class UserGrpcService extends UserServiceGrpcGrpc.UserServiceGrpcImplBase
     }
 
     @Override
+    public void getUserByKeycloakId(GetUserByKeycloakIdRequest request, StreamObserver<UserResponse> responseObserver) {
+        try {
+            User u = userService.obtenerPorKeycloakId(request.getKeycloakId());
+            if (u == null) {
+                responseObserver.onNext(UserResponse.newBuilder().setId("").build());
+                responseObserver.onCompleted();
+                return;
+            }
+
+            UserResponse resp = UserResponse.newBuilder()
+                    .setId(String.valueOf(u.getId()))
+                    .setNombre(u.getNombre())
+                    .setApellido(u.getApellido())
+                    .setCorreo(u.getCorreo())
+                    .setTelefono(u.getTelefono() == null ? "" : u.getTelefono())
+                    .setRole(u.getRole() == null ? "" : u.getRole().name())
+                    .build();
+
+            responseObserver.onNext(resp);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            responseObserver.onNext(UserResponse.newBuilder().setId("").build());
+            responseObserver.onCompleted();
+        }
+    }
+
+    @Override
     public void listUsers(Empty request, StreamObserver<UserListResponse> responseObserver) {
         List<User> list = userService.obtenerUsuarios();
         UserListResponse.Builder b = UserListResponse.newBuilder();

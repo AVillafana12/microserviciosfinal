@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/appointments")
+@RequestMapping("/api/appointments")
 @RequiredArgsConstructor
 public class AppointmentController {
 

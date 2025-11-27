@@ -24,8 +24,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://keycloak:8080/realms/clinic-realm
-          jwk-set-uri: http://keycloak:8080/realms/clinic-realm/protocol/openid-connect/certs
+          issuer-uri: http://keycloak:8080/realms/clinic
+          jwk-set-uri: http://keycloak:8080/realms/clinic/protocol/openid-connect/certs
 
 server:
   port: 5000
@@ -38,6 +38,12 @@ eureka:
     fetch-registry: true
   instance:
     prefer-ip-address: true
+
+grpc:
+  client:
+    user-service:
+      address: static://user-service:9091
+      negotiationType: plaintext
 
 image:
   storage:

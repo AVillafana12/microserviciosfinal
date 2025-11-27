@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@ComponentScan(basePackages = {"com.clinic.image_service", "com.clinic.controller", "com.clinic.service", "com.clinic.repository", "com.clinic.config"})
+@ComponentScan(basePackages = {"com.clinic.image_service", "com.clinic.controller", "com.clinic.service", "com.clinic.repository", "com.clinic.config", "com.clinic.grpc"})
 @EnableJpaRepositories(basePackages = "com.clinic.repository")
 public class ImageServiceApplication {
 
