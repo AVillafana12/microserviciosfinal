@@ -63,6 +63,67 @@ async function loginWithPassword(username, password) {
     }
 }
 
+// Función helper para hacer peticiones con mejor manejo de errores
+async function fetchWithAuth(url, options = {}) {
+    const token = getToken();
+    if (!token) {
+        throw new Error('No token available. Please login first.');
+    }
+
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+        ...options.headers
+    };
+
+    // Solo agregar Content-Type si no es FormData
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
+
+    const config = {
+        ...options,
+        headers,
+        mode: 'cors',
+        credentials: 'omit'
+    };
+
+    console.log('🌐 Fetching:', url);
+    console.log('📤 Config:', config);
+
+    try {
+        const response = await fetch(url, config);
+        
+        console.log('📥 Response status:', response.status);
+        console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
+
+        if (!response.ok) {
+            let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+            try {
+                const errorData = await response.text();
+                if (errorData) {
+                    errorMessage += `\n${errorData}`;
+                }
+            } catch (e) {
+                // Ignorar si no se puede leer el body
+            }
+            throw new Error(errorMessage);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json();
+        } else if (contentType && contentType.includes('image/')) {
+            return response.blob();
+        } else {
+            return await response.text();
+        }
+    } catch (error) {
+        console.error('❌ Fetch error:', error);
+        throw error;
+    }
+}
+
 // Login con Keycloak (flujo Authorization Code - producción)
 function loginWithKeycloak() {
     const redirectUri = encodeURIComponent(window.location.origin + '/login.html');
@@ -141,17 +202,23 @@ async function checkGatewayStatus() {
     try {
         const res = await fetch(`${API_GATEWAY}/actuator/health`, { 
             method: 'GET',
-            mode: 'cors'
+            mode: 'cors',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'omit'
         });
         
         if (res.ok) {
             const data = await res.json();
             statusDiv.innerHTML = `<p class="success">✅ API Gateway: ${data.status || 'UP'}</p>`;
         } else {
-            throw new Error('Gateway no disponible');
+            throw new Error(`Gateway responded with ${res.status}`);
         }
     } catch(e) {
-        statusDiv.innerHTML = `<p class="error">❌ API Gateway no disponible en ${API_GATEWAY}</p>`;
+        console.error('Gateway check error:', e);
+        statusDiv.innerHTML = `<p class="error">❌ API Gateway: ${e.message}</p>`;
     }
 }
 
@@ -165,4 +232,5 @@ function setTestToken(token) {
 if (typeof window !== 'undefined') {
     window.setTestToken = setTestToken;
     window.loginWithPassword = loginWithPassword;
+    window.fetchWithAuth = fetchWithAuth;
 }

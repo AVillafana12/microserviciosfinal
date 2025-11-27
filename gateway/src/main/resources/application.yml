@@ -7,43 +7,42 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+            exposedHeaders:
+              - Authorization
+              - Content-Type
       routes:
+        # User Service Routes
         - id: user-service
           uri: lb://user-service
           predicates:
-            - Path=/users/**
+            - Path=/api/users/**
           filters:
             - StripPrefix=0
+            
+        # Appointment Service Routes
         - id: appointment-service
           uri: lb://appointment-service
           predicates:
-            - Path=/appointments/**
+            - Path=/api/appointments/**
           filters:
             - StripPrefix=0
+            
+        # Image Service Routes
         - id: image-service
           uri: lb://image-service
           predicates:
-            - Path=/images/**
+            - Path=/api/images/**
           filters:
             - StripPrefix=0
-  security:
-    oauth2:
-      client:
-        registration:
-          keycloak:
-            client-id: gateway
-            client-secret: kn6qXopbH5jqx26zFdyS1odEE6nVSDr4
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
-            scope: openid,profile,email
-        provider:
-          keycloak:
-            issuer-uri: http://keycloak:8080/realms/clinic
-            user-name-attribute: preferred_username
-      resourceserver:
-        jwt:
-          issuer-uri: http://keycloak:8080/realms/clinic
-          jwk-set-uri: http://keycloak:8080/realms/clinic/protocol/openid-connect/certs
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
 
 server:
   port: 8080
@@ -52,17 +51,35 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://eureka:eureka123@eureka-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
   instance:
     preferIpAddress: true
+    instance-id: ${spring.application.name}:${random.value}
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,actuator
+        include: "*"
+      base-path: /actuator
+      cors:
+        allowed-origins: "*"
+        allowed-methods: "*"
+        allowed-headers: "*"
+        allow-credentials: true
   endpoint:
     health:
       show-details: always
+  health:
+    defaults:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+    reactor.netty: DEBUG
 
 springdoc:
   swagger-ui:
