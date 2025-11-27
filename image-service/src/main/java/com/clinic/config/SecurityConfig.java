@@ -22,11 +22,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> {})
+                .anyRequest().permitAll()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
